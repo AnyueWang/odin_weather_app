@@ -23,10 +23,19 @@ btnSearch.addEventListener('click', async (event) => {
                     break;
             }
         }
-        console.log(rawData)
+        const data = {
+            city: rawData.location.name,
+            country: rawData.location.country,
+            weatherIconSrc: rawData.current.condition.icon,
+            temp_c: rawData.current.temp_c,
+            weatherText: rawData.current.condition.text,
+            wind_mph: rawData.current.wind_mph,
+            humidity: rawData.current.humidity,
+        }
         const weatherIcon = new Image()
-        weatherIcon.src = rawData.current.condition.icon
+        weatherIcon.src = data.weatherIconSrc
         resultDiv.appendChild(weatherIcon)
+        console.log(data)
     } catch (error) {
         console.log(error.message)
     }
