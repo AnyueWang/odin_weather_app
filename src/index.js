@@ -7,13 +7,31 @@ const btnSearch = document.getElementById('search-btn')
 const inputSearch = document.getElementById('search-input')
 const contentDiv = document.getElementById('content-container')
 
+inputSearch.addEventListener('keydown', async (event) => {
+    const currentStr = event.target.value + event.key
+    if (currentStr.length <= 2) return
+    try {
+        const res = await fetch(`${baseUrl}/search.json?key=${process.env.API_KEY}&q=${currentStr}`, { mode: 'cors' })
+        const rawData = await res.json()
+        if (rawData.length == 0) return
+        const data = []
+        rawData.forEach(eachCity => {
+            const info = `${eachCity.name}, ${eachCity.region}, ${eachCity.country}`
+            data.push(info)
+        })
+        console.log(data)
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 btnSearch.addEventListener('click', async (event) => {
     event.preventDefault()
     const preResultDiv = document.getElementById('result-container')
     if (preResultDiv) preResultDiv.remove()
     const city = inputSearch.value.toLowerCase()
     try {
-        const res = await fetch(`${baseUrl}/forecast.json?key=${process.env.API_KEY}&q=${city}&days=3`)
+        const res = await fetch(`${baseUrl}/forecast.json?key=${process.env.API_KEY}&q=${city}&days=3`, { mode: 'cors' })
         const rawData = await res.json()
         if (rawData.error) {
             const errorCode = rawData.error.code
@@ -84,7 +102,6 @@ btnSearch.addEventListener('click', async (event) => {
         forecastDiv.classList.add('forecast-container')
         const dateArray = data.localtime.split(' ')[0].split('-')
         const today = new Date(dateArray[0], Number(dateArray[1]) - 1, dateArray[2])
-        console.log(today)
         data.forecast.forEach((eachDayForecast, idx) => {
             const eachDate = add(today, { days: idx })
             const eachDiv = document.createElement('div')
