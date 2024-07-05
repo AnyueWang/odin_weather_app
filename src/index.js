@@ -6,8 +6,13 @@ const baseUrl = 'http://api.weatherapi.com/v1'
 const btnSearch = document.getElementById('search-btn')
 const inputSearch = document.getElementById('search-input')
 const contentDiv = document.getElementById('content-container')
+const searchForm = document.getElementById('search-form')
 
 inputSearch.addEventListener('keydown', async (event) => {
+    const previousCandidates = document.querySelector('.search-candidates-container')
+    if (previousCandidates) {
+        previousCandidates.remove()
+    }
     const currentStr = event.target.value + event.key
     if (currentStr.length <= 2) return
     try {
@@ -16,17 +21,36 @@ inputSearch.addEventListener('keydown', async (event) => {
         if (rawData.length == 0) return
         const data = []
         rawData.forEach(eachCity => {
-            const info = `${eachCity.name}, ${eachCity.region}, ${eachCity.country}`
+            const info = `${eachCity.name || ''}, ${eachCity.region || ''}, ${eachCity.country || ''}`
             data.push(info)
         })
-        console.log(data)
+        if (data) {
+            const candidateDiv = document.createElement('div')
+            candidateDiv.classList.add('search-candidates-container')
+            data.forEach(eachCity => {
+                const cityDiv = document.createElement('div')
+                cityDiv.textContent = eachCity
+                candidateDiv.appendChild(cityDiv)
+
+                cityDiv.addEventListener('click', async (event) => {
+                    await searchWeather(event)
+                })
+            })
+            searchForm.appendChild(candidateDiv)
+        }
     } catch (error) {
         console.log(error)
     }
 })
 
-btnSearch.addEventListener('click', async (event) => {
+btnSearch.addEventListener('click', searchWeather)
+
+async function searchWeather(event) {
     event.preventDefault()
+    const previousCandidates = document.querySelector('.search-candidates-container')
+    if (previousCandidates) {
+        previousCandidates.remove()
+    }
     const preResultDiv = document.getElementById('result-container')
     if (preResultDiv) preResultDiv.remove()
     const city = inputSearch.value.toLowerCase()
@@ -134,4 +158,4 @@ btnSearch.addEventListener('click', async (event) => {
     } catch (error) {
         console.log(error.message)
     }
-})
+}
