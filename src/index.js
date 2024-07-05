@@ -13,7 +13,14 @@ inputSearch.addEventListener('keydown', async (event) => {
     if (previousCandidates) {
         previousCandidates.remove()
     }
-    const currentStr = event.target.value + event.key
+    const previousError = document.querySelector('.error-container')
+        if (previousError) {
+            previousError.remove()
+        }
+    const currentStr = (event.key === 'Backspace' && event.target.value.length !== 0)
+        ? event.target.value.slice(0, -1)
+        : event.target.value + event.key
+
     if (currentStr.length <= 2) return
     try {
         const res = await fetch(`${baseUrl}/search.json?key=${process.env.API_KEY}&q=${currentStr}`, { mode: 'cors' })
@@ -39,7 +46,17 @@ inputSearch.addEventListener('keydown', async (event) => {
             searchForm.appendChild(candidateDiv)
         }
     } catch (error) {
-        console.log(error)
+        const previousCandidates = document.querySelector('.search-candidates-container')
+        if (previousCandidates) {
+            previousCandidates.remove()
+        }
+        const previousError = document.querySelector('.error-container')
+        if (previousError) {
+            previousError.remove()
+        }
+        const errorDiv = document.createElement('div')
+        errorDiv.setAttribute('id', 'error-container')
+        errorDiv.textContent = `ERROR: ${error.message}`
     }
 })
 
@@ -51,6 +68,10 @@ async function searchWeather(event) {
     if (previousCandidates) {
         previousCandidates.remove()
     }
+    const previousError = document.querySelector('.error-container')
+        if (previousError) {
+            previousError.remove()
+        }
     const preResultDiv = document.getElementById('result-container')
     if (preResultDiv) preResultDiv.remove()
     const city = inputSearch.value.toLowerCase()
@@ -156,6 +177,17 @@ async function searchWeather(event) {
 
         contentDiv.appendChild(resultDiv)
     } catch (error) {
-        console.log(error.message)
+        const previousCandidates = document.querySelector('.search-candidates-container')
+        if (previousCandidates) {
+            previousCandidates.remove()
+        }
+        const previousError = document.querySelector('.error-container')
+        if (previousError) {
+            previousError.remove()
+        }
+        const errorDiv = document.createElement('div')
+        errorDiv.classList.add('error-container')
+        errorDiv.textContent = `ERROR: ${error.message}`
+        contentDiv.appendChild(errorDiv)
     }
 }

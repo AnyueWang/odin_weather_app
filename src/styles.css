@@ -53,7 +53,8 @@ body {
 }
 
 #search-container, 
-#result-container {
+#result-container,
+.error-container {
     background-color: var(--middle-layer-background-color);
     width: 600px;
     padding: 10px 20px;
@@ -158,4 +159,10 @@ body {
 .search-candidates-container div:hover {
     background-color: var(--upper-layer-background-color);
     border-radius: 10px;
+}
+
+.error-container {
+    font-size: 30px;
+    color: var(--dark-font-color);
+    background-color: var(--upper-layer-background-color);
 }
