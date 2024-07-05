@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const Dotenv = require('dotenv-webpack')
 
 module.exports = {
     entry: {
@@ -8,6 +9,12 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Weather App',
+            template: './src/template.html',
+            inject: 'body',
+            environment: process.env.API_KEY,
+        }),
+        new Dotenv({
+            path: './src/.env'
         })
     ],
     output: {
@@ -24,6 +31,10 @@ module.exports = {
             {
                 test: /\.(png|svg|jpg|jpeg|gif)$/i,
                 type: 'asset/resource',
+            },
+            {
+                test: /\.html$/i,
+                loader:'html-loader'
             }
         ]
     },
