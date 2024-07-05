@@ -1,17 +1,60 @@
+@font-face {
+    font-family: 'radio-canada-big';
+    src: url('./resources/fonts/RadioCanadaBig-VariableFont_wght.ttf') format('truetype');
+}
+
+:root {
+    --lower-layer-background-color: #82D0D9;
+    --middle-layer-background-color: #36B1BF;
+    --upper-layer-background-color: #037F8C;
+    --dark-font-color: #F272A1;
+    --light-font-color: #F299B1;
+    --icon-filter-dark: invert(64%) sepia(37%) saturate(2182%) hue-rotate(298deg) brightness(99%) contrast(91%);
+
+    --normal-font-size: 30px;
+    --font-family: radio-canada-big, Helvetica, Arial, sans-serif;
+}
+
 body {
-    background-color: rgb(252, 246, 239);
+    background-color: var(--lower-layer-background-color);
+    font-family: var(--font-family);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--middle-layer-background-color) inset !important;
+    -webkit-text-fill-color: var(--light-font-color);
+    -webkit-text-size-adjust: var(--normal-font-size);
 }
 
 #search-container {
-    background-color: bisque;
-    width: 50%;
+    background-color: var(--middle-layer-background-color);
+    width: fit-content;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#search-btn {
+    background-color: var(--middle-layer-background-color);
+    border: 0;
 }
 
 #search-input {
     border: 0;
-    background-color: antiquewhite;
+    background-color: var(--middle-layer-background-color);
+    outline: none;
+    color: var(--light-font-color) !important;
+    font-size: var(--normal-font-size);
+    font-family: var(--font-family);
+    font-weight: 400;
 }
 
-#search-input:focus {
-    border: 0;
+.function-icon {
+    filter: var(--icon-filter-dark);
+    width: 30px;
 }

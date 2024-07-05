@@ -35,6 +35,10 @@ module.exports = {
             {
                 test: /\.html$/i,
                 loader:'html-loader'
+            },
+            {
+                test: /\.ttf$/i,
+                type: 'asset/resource'
             }
         ]
     },
