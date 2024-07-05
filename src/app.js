@@ -1,4 +1,4 @@
-const baseUrl = 'http://api.weatherapi.com/v1'
+const baseUrl = 'https://api.weatherapi.com/v1'
 
 const search = async (str) => {
     const res = await fetch(`${baseUrl}/search.json?key=${process.env.API_KEY}&q=${str}`, { mode: 'cors' })
