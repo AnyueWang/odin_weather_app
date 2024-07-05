@@ -13,11 +13,25 @@
 
     --normal-font-size: 30px;
     --font-family: radio-canada-big, Helvetica, Arial, sans-serif;
+    --normal-font-weight: 400px;
+    --normal-letter-spacing: 2px;
 }
 
 body {
     background-color: var(--lower-layer-background-color);
     font-family: var(--font-family);
+    text-align: center;
+}
+
+::placeholder {
+    color: var(--dark-font-color);
+    opacity: 0.5;
+}
+
+#search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 input:-webkit-autofill,
@@ -27,6 +41,10 @@ input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--middle-layer-background-color) inset !important;
     -webkit-text-fill-color: var(--light-font-color);
     -webkit-text-size-adjust: var(--normal-font-size);
+}
+
+#content-container {
+    margin-top: 50px;
 }
 
 #search-container {
@@ -51,7 +69,8 @@ input:-webkit-autofill:active {
     color: var(--light-font-color) !important;
     font-size: var(--normal-font-size);
     font-family: var(--font-family);
-    font-weight: 400;
+    font-weight: var(--normal-font-weight);
+    letter-spacing: var(--normal-letter-spacing);
 }
 
 .function-icon {
