@@ -11,16 +11,24 @@
     --light-font-color: #F299B1;
     --icon-filter-dark: invert(64%) sepia(37%) saturate(2182%) hue-rotate(298deg) brightness(99%) contrast(91%);
 
-    --normal-font-size: 30px;
     --font-family: radio-canada-big, Helvetica, Arial, sans-serif;
-    --normal-font-weight: 400px;
-    --normal-letter-spacing: 2px;
+    --main-font-size: 30px;
+    --main-font-weight: 600;
+    --main-letter-spacing: 2px;
+    --normal-font-size: 20px;
+    --normal-font-weight: 400;
+    --normal-letter-spacing: 1px;
 }
 
 body {
     background-color: var(--lower-layer-background-color);
     font-family: var(--font-family);
     text-align: center;
+    font-family: var(--font-family);
+    font-size: var(--normal-font-size);
+    font-weight: var(--normal-font-weight);
+    letter-spacing: var(--normal-letter-spacing);
+    color: var(--light-font-color);
 }
 
 ::placeholder {
@@ -41,7 +49,7 @@ input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--middle-layer-background-color) inset !important;
     -webkit-text-fill-color: var(--light-font-color);
-    -webkit-text-size-adjust: var(--normal-font-size);
+    -webkit-text-size-adjust: var(--main-font-size);
 }
 
 #content-container {
@@ -78,10 +86,10 @@ input:-webkit-autofill:active {
     background-color: var(--middle-layer-background-color);
     outline: none;
     color: var(--light-font-color) !important;
-    font-size: var(--normal-font-size);
+    font-size: var(--main-font-size);
     font-family: var(--font-family);
-    font-weight: var(--normal-font-weight);
-    letter-spacing: var(--normal-letter-spacing);
+    font-weight: var(--main-font-weight);
+    letter-spacing: var(--main-letter-spacing);
 }
 
 .function-icon {
@@ -91,4 +99,24 @@ input:-webkit-autofill:active {
 
 #result-container {
     height: fit-content;
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-items: center;
+}
+
+.icon-weather-main {
+    width: 160px;
+}
+
+.city-name {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.weather-name {
+    font-size: 25px;
+    font-weight: 700;
+    margin-top: 0;
 }
