@@ -1,5 +1,5 @@
 import './styles.css'
-import { format } from 'date-fns'
+import { format, add } from 'date-fns'
 
 const baseUrl = 'http://api.weatherapi.com/v1'
 
@@ -27,6 +27,17 @@ btnSearch.addEventListener('click', async (event) => {
             }
         }
         inputSearch.value = ''
+        const forecastData = []
+        rawData.forecast.forecastday.forEach(eachDayData => {
+            const lastHourData = eachDayData.hour.at(12)
+            const requiredData = {
+                weatherIconSrc: lastHourData.condition.icon.replace('64x64', '128x128'),
+                maxtemp_c: eachDayData.day.maxtemp_c,
+                mintemp_c: eachDayData.day.mintemp_c,
+                weatherText: lastHourData.condition.text,
+            }
+            forecastData.push(requiredData)
+        });
         const data = {
             city: rawData.location.name,
             region: rawData.location.region,
@@ -35,6 +46,7 @@ btnSearch.addEventListener('click', async (event) => {
             temp_c: rawData.current.temp_c,
             weatherText: rawData.current.condition.text,
             localtime: rawData.location.localtime,
+            forecast: forecastData,
         }
         const resultDiv = document.createElement('div')
         resultDiv.setAttribute('id', 'result-container')
@@ -63,10 +75,45 @@ btnSearch.addEventListener('click', async (event) => {
         basicDiv.appendChild(timeP)
         resultDiv.appendChild(basicDiv)
 
+        const forecastP = document.createElement('p')
+        forecastP.textContent = 'Forecast:'
+        forecastP.classList.add('forecast-title')
+        resultDiv.appendChild(forecastP)
 
+        const forecastDiv = document.createElement('div')
+        forecastDiv.classList.add('forecast-container')
+        const dateArray = data.localtime.split(' ')[0].split('-')
+        const today = new Date(dateArray[0], Number(dateArray[1]) - 1, dateArray[2])
+        console.log(today)
+        data.forecast.forEach((eachDayForecast, idx) => {
+            const eachDate = add(today, { days: idx })
+            const eachDiv = document.createElement('div')
+
+            const eachDateP = document.createElement('p')
+            eachDateP.textContent = format(eachDate, 'MM/dd EEE')
+            eachDateP.classList.add('forecast-content')
+            eachDiv.appendChild(eachDateP)
+
+            const eachWeatherIcon = new Image()
+            eachWeatherIcon.src = eachDayForecast.weatherIconSrc
+            eachWeatherIcon.classList.add('icon-weather-forecast')
+            eachDiv.appendChild(eachWeatherIcon)
+
+            const eachWeatherP = document.createElement('p')
+            eachWeatherP.textContent = eachDayForecast.weatherText
+            eachWeatherP.classList.add('forecast-content')
+            eachDiv.appendChild(eachWeatherP)
+
+            const eachTempP = document.createElement('p')
+            eachTempP.textContent = `${eachDayForecast.maxtemp_c} - ${eachDayForecast.mintemp_c} °C`
+            eachTempP.classList.add('forecast-content')
+            eachDiv.appendChild(eachTempP)
+
+            forecastDiv.appendChild(eachDiv)
+        })
+        resultDiv.appendChild(forecastDiv)
 
         contentDiv.appendChild(resultDiv)
-
     } catch (error) {
         console.log(error.message)
     }
