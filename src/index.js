@@ -1,83 +1,51 @@
 import './styles.css'
-import { format, add } from 'date-fns'
-
-const baseUrl = 'http://api.weatherapi.com/v1'
+import reset from './reset'
+import app from './app'
+import rawdataProcessor from './rawdata-processor'
+import components from './components'
 
 const btnSearch = document.getElementById('search-btn')
 const inputSearch = document.getElementById('search-input')
 const contentDiv = document.getElementById('content-container')
 const searchForm = document.getElementById('search-form')
 
-inputSearch.addEventListener('keydown', async (event) => {
-    const previousCandidates = document.querySelector('.search-candidates-container')
-    if (previousCandidates) {
-        previousCandidates.remove()
-    }
-    const previousError = document.querySelector('.error-container')
-        if (previousError) {
-            previousError.remove()
-        }
-    const currentStr = (event.key === 'Backspace' && event.target.value.length !== 0)
-        ? event.target.value.slice(0, -1)
-        : event.target.value + event.key
+inputSearch.addEventListener('keydown', searchInput)
+btnSearch.addEventListener('click', searchWeather)
 
+async function searchInput(event) {
+    reset.removePreviousCadidates()
+    reset.removePreviousError()
+    if (event.key === 'Enter') return
+    const currentStr = event.key.length === 1
+        ? event.target.value + event.key
+        : (
+            event.key === 'Backspace' && event.target.value.length !== 0
+                ? event.target.value.slice(0, -1)
+                : event.target.value
+        )
     if (currentStr.length <= 2) return
     try {
-        const res = await fetch(`${baseUrl}/search.json?key=${process.env.API_KEY}&q=${currentStr}`, { mode: 'cors' })
-        const rawData = await res.json()
+        const rawData = await app.search(currentStr)
         if (rawData.length == 0) return
-        const data = []
-        rawData.forEach(eachCity => {
-            const info = `${eachCity.name || ''}, ${eachCity.region || ''}, ${eachCity.country || ''}`
-            data.push(info)
-        })
+        const data = rawdataProcessor.processCandidateData(rawData)
         if (data) {
-            const candidateDiv = document.createElement('div')
-            candidateDiv.classList.add('search-candidates-container')
-            data.forEach(eachCity => {
-                const cityDiv = document.createElement('div')
-                cityDiv.textContent = eachCity
-                candidateDiv.appendChild(cityDiv)
-
-                cityDiv.addEventListener('click', async (event) => {
-                    await searchWeather(event)
-                })
-            })
+            const candidateDiv = components.generateCandidateDiv(data, searchWeather)
             searchForm.appendChild(candidateDiv)
         }
     } catch (error) {
-        const previousCandidates = document.querySelector('.search-candidates-container')
-        if (previousCandidates) {
-            previousCandidates.remove()
-        }
-        const previousError = document.querySelector('.error-container')
-        if (previousError) {
-            previousError.remove()
-        }
-        const errorDiv = document.createElement('div')
-        errorDiv.setAttribute('id', 'error-container')
-        errorDiv.textContent = `ERROR: ${error.message}`
+        handleError(error)
     }
-})
-
-btnSearch.addEventListener('click', searchWeather)
+}
 
 async function searchWeather(event) {
     event.preventDefault()
-    const previousCandidates = document.querySelector('.search-candidates-container')
-    if (previousCandidates) {
-        previousCandidates.remove()
-    }
-    const previousError = document.querySelector('.error-container')
-        if (previousError) {
-            previousError.remove()
-        }
-    const preResultDiv = document.getElementById('result-container')
-    if (preResultDiv) preResultDiv.remove()
+    reset.removePreviousCadidates()
+    reset.removePreviousError()
+    reset.removePreviousResult()
     const city = inputSearch.value.toLowerCase()
+    inputSearch.value = ''
     try {
-        const res = await fetch(`${baseUrl}/forecast.json?key=${process.env.API_KEY}&q=${city}&days=3`, { mode: 'cors' })
-        const rawData = await res.json()
+        const rawData = await app.get(city)
         if (rawData.error) {
             const errorCode = rawData.error.code
             switch (errorCode) {
@@ -89,105 +57,17 @@ async function searchWeather(event) {
                     break;
             }
         }
-        inputSearch.value = ''
-        const forecastData = []
-        rawData.forecast.forecastday.forEach(eachDayData => {
-            const lastHourData = eachDayData.hour.at(12)
-            const requiredData = {
-                weatherIconSrc: lastHourData.condition.icon.replace('64x64', '128x128'),
-                maxtemp_c: eachDayData.day.maxtemp_c,
-                mintemp_c: eachDayData.day.mintemp_c,
-                weatherText: lastHourData.condition.text,
-            }
-            forecastData.push(requiredData)
-        });
-        const data = {
-            city: rawData.location.name,
-            region: rawData.location.region,
-            country: rawData.location.country,
-            weatherIconSrc: rawData.current.condition.icon.replace('64x64', '128x128'),
-            temp_c: rawData.current.temp_c,
-            weatherText: rawData.current.condition.text,
-            localtime: rawData.location.localtime,
-            forecast: forecastData,
-        }
-        const resultDiv = document.createElement('div')
-        resultDiv.setAttribute('id', 'result-container')
-
-        const weatherDiv = document.createElement('div')
-        const weatherIcon = new Image()
-        weatherIcon.src = data.weatherIconSrc
-        weatherIcon.classList.add('icon-weather-main')
-        const weatherP = document.createElement('p')
-        weatherP.textContent = `${data.weatherText}, ${data.temp_c} °C`
-        weatherP.classList.add('weather-name')
-        weatherDiv.appendChild(weatherIcon)
-        weatherDiv.appendChild(weatherP)
-        resultDiv.appendChild(weatherDiv)
-
-        const basicDiv = document.createElement('div')
-        const cityP = document.createElement('p')
-        cityP.textContent = data.city
-        cityP.classList.add('city-name')
-        const countryP = document.createElement('p')
-        countryP.textContent = `${data.region}, ${data.country}`
-        const timeP = document.createElement('p')
-        timeP.textContent = data.localtime
-        basicDiv.appendChild(cityP)
-        basicDiv.appendChild(countryP)
-        basicDiv.appendChild(timeP)
-        resultDiv.appendChild(basicDiv)
-
-        const forecastP = document.createElement('p')
-        forecastP.textContent = 'Forecast:'
-        forecastP.classList.add('forecast-title')
-        resultDiv.appendChild(forecastP)
-
-        const forecastDiv = document.createElement('div')
-        forecastDiv.classList.add('forecast-container')
-        const dateArray = data.localtime.split(' ')[0].split('-')
-        const today = new Date(dateArray[0], Number(dateArray[1]) - 1, dateArray[2])
-        data.forecast.forEach((eachDayForecast, idx) => {
-            const eachDate = add(today, { days: idx })
-            const eachDiv = document.createElement('div')
-
-            const eachDateP = document.createElement('p')
-            eachDateP.textContent = format(eachDate, 'MM/dd EEE')
-            eachDateP.classList.add('forecast-content')
-            eachDiv.appendChild(eachDateP)
-
-            const eachWeatherIcon = new Image()
-            eachWeatherIcon.src = eachDayForecast.weatherIconSrc
-            eachWeatherIcon.classList.add('icon-weather-forecast')
-            eachDiv.appendChild(eachWeatherIcon)
-
-            const eachWeatherP = document.createElement('p')
-            eachWeatherP.textContent = eachDayForecast.weatherText
-            eachWeatherP.classList.add('forecast-content')
-            eachDiv.appendChild(eachWeatherP)
-
-            const eachTempP = document.createElement('p')
-            eachTempP.textContent = `${eachDayForecast.maxtemp_c} - ${eachDayForecast.mintemp_c} °C`
-            eachTempP.classList.add('forecast-content')
-            eachDiv.appendChild(eachTempP)
-
-            forecastDiv.appendChild(eachDiv)
-        })
-        resultDiv.appendChild(forecastDiv)
-
+        const data = rawdataProcessor.processWeatherData(rawData)
+        const resultDiv = components.generateWeatherDiv(data)
         contentDiv.appendChild(resultDiv)
     } catch (error) {
-        const previousCandidates = document.querySelector('.search-candidates-container')
-        if (previousCandidates) {
-            previousCandidates.remove()
-        }
-        const previousError = document.querySelector('.error-container')
-        if (previousError) {
-            previousError.remove()
-        }
-        const errorDiv = document.createElement('div')
-        errorDiv.classList.add('error-container')
-        errorDiv.textContent = `ERROR: ${error.message}`
-        contentDiv.appendChild(errorDiv)
+        handleError(error)
     }
+}
+
+function handleError(error) {
+    reset.removePreviousCadidates()
+    reset.removePreviousError()
+    const errorDiv = components.generateErrorDiv(error.message)
+    contentDiv.appendChild(errorDiv)
 }
